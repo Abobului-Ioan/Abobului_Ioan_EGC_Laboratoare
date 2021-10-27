@@ -1,36 +1,56 @@
-﻿using System;
-using System.Drawing;
+﻿using Abobului_Ioan_3131_B_Lab_2;
 using OpenTK;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using System;
+using System.Drawing;
 
-/**
-    Aplicația utilizează biblioteca OpenTK v2.0.0 (stable) oficială și OpenTK. GLControl v2.0.0
-    (unstable) neoficială. Aplicația fiind scrisă în modul consolă nu va utiliza controlul WinForms
-    oferit de OpenTK!
-    Tipul de ferestră utilizat: GAMEWINDOW. Se demmonstrează modul imediat de randare (vezi comentariul!)...
-**/
+/// <summary>
+/// Abobului Ioan
+/// Grupa 3131-B
+/// Calculatoare anul 3 
+/// </summary>
+
 namespace OpenTK_console_sample02
 {
-    class SimpleWindow3D : GameWindow
+    internal class SimpleWindow3D : GameWindow
     {
+        private const int XYZ_SIZE = 75;
+        private const float rotation_speed = 180.0f;
+        private float angle;
+        private bool showCube = true;
+        private bool moveLeft, moveRight, moveUp, moveDown;
+        private bool moveMouseLeft, moveMouseRight;
+        private int colorRed = 0, colorGreen = 0, colorBlue = 0;
+        private int minColor = 0, maxColor = 255;
+        private int[] WiewPort = new int[3];
 
-        const float rotation_speed = 180.0f;
-        float angle;
-        bool showCube = true;
-        bool moveLeft, moveRight, moveUp, moveDown;
-       
-        KeyboardState lastKeyPress;
+        private const string FileName = @"D:\Facultate anul 3\EGC\Laborator 2\Abobului_Ioan_3131_B\CoordonateTriunghi.txt";
+
+        //functie pentru a verifica daca culoarea este la minim sau maxim
+
+        public bool CheckIfInRangeColor(int color)
+        {
+            if (color >= minColor && color < maxColor)
+                return true;
+            return false;
+        }
+
+        private KeyboardState lastKeyPress;
 
         // Constructor.
-        public SimpleWindow3D() : base(800, 600)
+        public SimpleWindow3D() : base(800, 600, new GraphicsMode(32, 24, 0, 8))
         {
             VSync = VSyncMode.On;
+
+            WiewPort[0] = WiewPort[1] = WiewPort[2] = 10;
         }
 
         /**Setare mediu OpenGL și încarcarea resurselor (dacă e necesar) - de exemplu culoarea de
            fundal a ferestrei 3D.
            Atenție! Acest cod se execută înainte de desenarea efectivă a scenei 3D. */
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -41,8 +61,9 @@ namespace OpenTK_console_sample02
 
         /**Inițierea afișării și setarea viewport-ului grafic. Metoda este invocată la redimensionarea
            ferestrei. Va fi invocată o dată și imediat după metoda ONLOAD()!
-           Viewport-ul va fi dimensionat conform mărimii ferestrei active (cele 2 obiecte pot avea și mărimi 
+           Viewport-ul va fi dimensionat conform mărimii ferestrei active (cele 2 obiecte pot avea și mărimi
            diferite). */
+
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -58,6 +79,7 @@ namespace OpenTK_console_sample02
 
         /** Secțiunea pentru "game logic"/"business logic". Tot ce se execută în această secțiune va fi randat
             automat pe ecran în pasul următor - control utilizator, actualizarea poziției obiectelor, etc. */
+
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
@@ -68,7 +90,77 @@ namespace OpenTK_console_sample02
             moveRight = false;
             moveUp = false;
             moveDown = false;
-            // Se utilizeaza mecanismul de control input oferit de OpenTK (include perifcerice multiple, mai ales pentru gaming - gamepads, joysticks, etc.).
+
+            ///Laborator 3 - punctul 9 si 8 cu modificarea culori
+
+            #region Laborator 3 - punctul 9- Modificare culoare RGB
+
+            if (keyboard[OpenTK.Input.Key.G])
+            {
+                if (keyboard[OpenTK.Input.Key.Up])
+                {
+                    if (CheckIfInRangeColor(colorGreen))
+                    {
+                        colorGreen++;
+                        Console.WriteLine("Red: " + colorRed + " Green: " + colorGreen + " Blue: " + colorBlue);
+                    }
+                }
+                else if (keyboard[OpenTK.Input.Key.Down])
+                {
+                    if (CheckIfInRangeColor(colorGreen - 1))
+                    {
+                        colorGreen--;
+                        Console.WriteLine("Red: " + colorRed + " Green: " + colorGreen + " Blue: " + colorBlue);
+                    }
+                }
+            }
+
+            if (keyboard[OpenTK.Input.Key.R])
+            {
+                if (keyboard[OpenTK.Input.Key.Up])
+                {
+                    if (CheckIfInRangeColor(colorRed))
+                    {
+                        colorRed++;
+                        Console.WriteLine("Red: " + colorRed + " Green: " + colorGreen + " Blue: " + colorBlue);
+                    }
+                }
+                else if (keyboard[OpenTK.Input.Key.Down])
+                {
+                    if (CheckIfInRangeColor(colorRed - 1))
+                    {
+                        colorRed--;
+                        Console.WriteLine("Red: " + colorRed + " Green: " + colorGreen + " Blue: " + colorBlue);
+                    }
+                }
+            }
+
+            if (keyboard[OpenTK.Input.Key.B])
+            {
+                if (keyboard[OpenTK.Input.Key.Up])
+                {
+                    if (CheckIfInRangeColor(colorBlue))
+                    {
+                        colorBlue++;
+                        Console.WriteLine("Red: " + colorRed + " Green: " + colorGreen + " Blue: " + colorBlue);
+                    }
+                }
+                else if (keyboard[OpenTK.Input.Key.Down])
+                {
+                    if (CheckIfInRangeColor(colorBlue - 1))
+                    {
+                        colorBlue--;
+                        Console.WriteLine("Red: " + colorRed + " Green: " + colorGreen + " Blue: " + colorBlue);
+                    }
+                }
+            }
+
+            #endregion Laborator 3 - punctul 9- Modificare culoare RGB
+
+            //Verificare daca o tasta este apasata
+
+            #region Verificare si modificare stare tasta
+
             if (keyboard[OpenTK.Input.Key.Escape])
             {
                 Exit();
@@ -77,28 +169,23 @@ namespace OpenTK_console_sample02
             if (keyboard[OpenTK.Input.Key.Left])
             {
                 moveLeft = true;
-                
             }
 
             if (keyboard[OpenTK.Input.Key.Right])
             {
                 moveRight = true;
-
             }
             if (keyboard[OpenTK.Input.Key.Up])
             {
                 moveUp = true;
-
             }
             if (keyboard[OpenTK.Input.Key.Down])
             {
                 moveDown = true;
-
             }
-
             else if (keyboard[OpenTK.Input.Key.P] && !keyboard.Equals(lastKeyPress))
             {
-                // Ascundere comandată, prin apăsarea unei taste - cu verificare de remanență! Timpul de reacțieuman << calculator.
+                // Ascundere comandată, prin apăsarea unei taste - cu verificare de remanență! Timpul de reacție uman << calculator.
                 if (showCube == true)
                 {
                     showCube = false;
@@ -108,61 +195,99 @@ namespace OpenTK_console_sample02
                     showCube = true;
                 }
             }
+
             lastKeyPress = keyboard;
 
+            #endregion Verificare si modificare stare tasta
 
-            if (mouse[OpenTK.Input.MouseButton.Left])
+            //Laborator 3 Miscare cu mouse
+
+            #region Laborator 3 Miscare mouse
+
+            moveMouseLeft = false;
+            moveMouseRight = false;
+
+            if (mouse.X < -50)
             {
-
+                moveMouseLeft = true;
+                if (WiewPort[0] > -10)
+                    WiewPort[0]--;
+            }
+            else if (mouse.X > 100)
+            {
+                moveMouseRight = true;
+                if (WiewPort[0] < 20)
+                    WiewPort[0]++;
+            }
+            if (mouse.Y < -50)
+            {
+                moveMouseLeft = true;
+                if (WiewPort[1] > -10)
+                    WiewPort[1]--;
+            }
+            else if (mouse.Y > 100)
+            {
+                moveMouseRight = true;
+                if (WiewPort[1] < 20)
+                    WiewPort[1]++;
             }
 
-                if (mouse[OpenTK.Input.MouseButton.Left])
-            {
-                // Ascundere comandată, prin clic de mouse - fără testare remanență.
-                if (showCube == true)
-                {
-                    showCube = false;
-                }
-                else
-                {
-                    showCube = true;
-                }
-            }
+            #endregion Laborator 3 Miscare mouse
+
+            //if (mouse[OpenTK.Input.MouseButton.Left])
+            //{
+            //    // Ascundere comandată, prin clic de mouse - fără testare remanență.
+            //    if (showCube == true)
+            //    {
+            //        showCube = false;
+            //    }
+            //    else
+            //    {
+            //        showCube = true;
+            //    }
+            //}
         }
 
-        /** Secțiunea pentru randarea scenei 3D. Controlată de modulul logic din metoda ONUPDATEFRAME().
-            Parametrul de intrare "e" conține informatii de timing pentru randare. */
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            Matrix4 lookat = Matrix4.LookAt(0, 1, 10, 0, 0, 0, 0, 1, 0);
+            //  Matrix4 lookat = Matrix4.LookAt(6, 6, 10, 0, 0, 0, 0, 1, 0);
+            Matrix4 lookat = Matrix4.LookAt(WiewPort[0], WiewPort[1], WiewPort[2], 0, 0, 0, 0, 1, 0);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref lookat);
 
-            if (moveLeft == true)
-            {
-                angle += rotation_speed * (float)e.Time;
-                GL.Rotate(angle, 0.0f, -1.0f, 0.0f);
-            }
+            DrawAxes();
 
-            if (moveRight == true)
-            {
-                angle += rotation_speed * (float)e.Time;
-                GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
-            }
-            if (moveUp == true)
-            {
-                angle += rotation_speed * (float)e.Time;
-                GL.Rotate(angle, 0.0f, 1.0f, 1.0f);
-            }
-            if (moveDown == true)
-            {
-                angle += rotation_speed * (float)e.Time;
-                GL.Rotate(angle, 0.0f, 0.0f, -1.0f);
-            }
+            Triunghi T = Triunghi.ReadCoordonates(FileName);
+            T.DrawMe(colorRed, colorGreen, colorBlue);
+
+            //Laborator 2 - Miscarea cubului cu ajutorul tastelor
+
+            #region Laborator 2 - Miscarea cubului cu ajutorul tastelor
+
+            //if (moveLeft == true)
+            //{
+            //    angle += rotation_speed * (float)e.Time;
+            //    GL.Rotate(angle, 0.0f, -1.0f, 0.0f);
+            //}
+
+            //if (moveRight == true)
+            //{
+            //    angle += rotation_speed * (float)e.Time;
+            //    GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
+            //}
+            //if (moveUp == true)
+            //{
+            //    angle += rotation_speed * (float)e.Time;
+            //    GL.Rotate(angle, 0.0f, 1.0f, 1.0f);
+            //}
+            //if (moveDown == true)
+            //{
+            //    angle += rotation_speed * (float)e.Time;
+            //    GL.Rotate(angle, 0.0f, 0.0f, -1.0f);
+            //}
 
             //if (keyboard[OpenTK.Input.Key.Right])
             //{
@@ -172,44 +297,51 @@ namespace OpenTK_console_sample02
             //angle += rotation_speed * (float)e.Time;
             //GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
 
+            #endregion Laborator 2 - Miscarea cubului cu ajutorul tastelor
+
             // Exportăm controlul randării obiectelor către o metodă externă (modularizare).
             if (showCube == true)
             {
                 DrawCube();
-               // DrawAxes_OLD();
-
-
-
             }
-
             SwapBuffers();
             //Thread.Sleep(1);
         }
 
-        private void DrawAxes_OLD()
-        {
-            GL.Begin(PrimitiveType.Lines);
+        //Laboratorul 3- punctul 1 - Desenarea axelor
 
-            // X
+        #region Laborator 3 - Punctul 1
+
+        private void DrawAxes()
+        {
+            GL.LineWidth(3.0f);
+
+            // Desenează axa Ox (cu roșu).
+            GL.Begin(PrimitiveType.Lines);
             GL.Color3(Color.Red);
             GL.Vertex3(0, 0, 0);
-            GL.Vertex3(20, 0, 0);
+            GL.Vertex3(XYZ_SIZE, 0, 0);
 
-            // Y
-            GL.Color3(Color.Blue);
-            GL.Vertex3(0, 0, 0);
-            GL.Vertex3(0, 20, 0);
-
-            // Z
+            // Desenează axa Oy (cu galben).
+            GL.Begin(PrimitiveType.Lines);
             GL.Color3(Color.Yellow);
             GL.Vertex3(0, 0, 0);
-            GL.Vertex3(0, 0, 20);
+            GL.Vertex3(0, XYZ_SIZE, 0); ;
 
-
+            // Desenează axa Oz (cu verde).
+            GL.Begin(PrimitiveType.Lines);
+            GL.Color3(Color.Green);
+            GL.Vertex3(0, 0, 0);
+            GL.Vertex3(0, 0, XYZ_SIZE);
             GL.End();
         }
 
-        // Utilizăm modul imediat!!!
+        #endregion Laborator 3 - Punctul 1
+
+        // Desenare cub
+
+        #region DrawCube
+
         private void DrawCube()
         {
             GL.Begin(PrimitiveType.Quads);
@@ -254,25 +386,15 @@ namespace OpenTK_console_sample02
             GL.End();
         }
 
-        [STAThread]
-        static void Main(string[] args)
-        {
+        #endregion DrawCube
 
-            /**Utilizarea cuvântului-cheie "using" va permite dealocarea memoriei o dată ce obiectul nu mai este
-               în uz (vezi metoda "Dispose()").
-               Metoda "Run()" specifică cerința noastră de a avea 30 de evenimente de tip UpdateFrame per secundă
-               și un număr nelimitat de evenimente de tip randare 3D per secundă (maximul suportat de subsistemul
-               grafic). Asta nu înseamnă că vor primi garantat respectivele valori!!!
-               Ideal ar fi ca după fiecare UpdateFrame să avem si un RenderFrame astfel încât toate obiectele generate
-               în scena 3D să fie actualizate fără pierderi (desincronizări între logica aplicației și imaginea randată
-               în final pe ecran). */
+        [STAThread]
+        private static void Main(string[] args)
+        {
             using (SimpleWindow3D example = new SimpleWindow3D())
             {
-
-                // Verificați semnătura funcției în documentația inline oferită de IntelliSense!
                 example.Run(30.0, 0.0);
             }
         }
     }
-
 }
