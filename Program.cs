@@ -27,6 +27,10 @@ namespace OpenTK_console_sample02
         private int[] WiewPort = new int[3];
 
         private const string FileName = @"D:\Facultate anul 3\EGC\Laborator 2\Abobului_Ioan_3131_B\CoordonateTriunghi.txt";
+        string fileNameCube = @"D:\Facultate anul 3\EGC\Laborator 2\Abobului_Ioan_3131_B\Cube.txt";
+
+        private Color[] cubeColors;
+        Randomizer randomColors;
 
         //functie pentru a verifica daca culoarea este la minim sau maxim
 
@@ -45,6 +49,14 @@ namespace OpenTK_console_sample02
             VSync = VSyncMode.On;
 
             WiewPort[0] = WiewPort[1] = WiewPort[2] = 10;
+
+            ///initializare culori pentru cub
+            randomColors = new Randomizer();
+            cubeColors = new Color[6];
+            for (int i = 0; i < 6; i++)
+            {
+                cubeColors[i] = randomColors.RandomColor();
+            }
         }
 
         /**Setare mediu OpenGL și încarcarea resurselor (dacă e necesar) - de exemplu culoarea de
@@ -200,6 +212,37 @@ namespace OpenTK_console_sample02
 
             #endregion Verificare si modificare stare tasta
 
+            #region Schimbarea culorii cubului Laborator 4 Punctul 1,3
+           
+                Randomizer faceColor = new Randomizer();
+                if (keyboard[OpenTK.Input.Key.Number1])
+                {
+                    cubeColors[0] = faceColor.RandomColor();
+                }
+                if (keyboard[OpenTK.Input.Key.Number2] )
+                {
+                    cubeColors[1] = faceColor.RandomColor();
+                }
+                if (keyboard[OpenTK.Input.Key.Number3] )
+                {
+                    cubeColors[2] = faceColor.RandomColor();
+                }
+                if (keyboard[OpenTK.Input.Key.Number4] )
+                {
+                    cubeColors[3] = faceColor.RandomColor();
+                }
+                if (keyboard[OpenTK.Input.Key.Number5] )
+                {
+                    cubeColors[4] = faceColor.RandomColor();
+                }
+                if (keyboard[OpenTK.Input.Key.Number6] )
+                {
+                    cubeColors[5] = faceColor.RandomColor();
+                }
+            
+
+            #endregion
+
             //Laborator 3 Miscare cu mouse
 
             #region Laborator 3 Miscare mouse
@@ -246,6 +289,7 @@ namespace OpenTK_console_sample02
             //        showCube = true;
             //    }
             //}
+            lastKeyPress = keyboard;
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -258,10 +302,14 @@ namespace OpenTK_console_sample02
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref lookat);
 
-            DrawAxes();
+            Axes coordAxes = new Axes();
+            coordAxes.setWidth(5);
+            coordAxes.DrawAxes();
 
             Triunghi T = Triunghi.ReadCoordonates(FileName);
             T.DrawMe(colorRed, colorGreen, colorBlue);
+
+            Cube cub = new Cube(fileNameCube);
 
             //Laborator 2 - Miscarea cubului cu ajutorul tastelor
 
@@ -297,12 +345,13 @@ namespace OpenTK_console_sample02
             //angle += rotation_speed * (float)e.Time;
             //GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
 
+
             #endregion Laborator 2 - Miscarea cubului cu ajutorul tastelor
 
             // Exportăm controlul randării obiectelor către o metodă externă (modularizare).
             if (showCube == true)
             {
-                DrawCube();
+                cub.DrawCube(cubeColors);
             }
             SwapBuffers();
             //Thread.Sleep(1);
