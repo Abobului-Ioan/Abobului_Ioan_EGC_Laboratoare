@@ -27,7 +27,24 @@ namespace OpenTK_console_sample02
         private int[] WiewPort = new int[3];
 
         private const string FileName = @"D:\Facultate anul 3\EGC\Laborator 2\Abobului_Ioan_3131_B\CoordonateTriunghi.txt";
+        string fileNameCube = @"D:\Facultate anul 3\EGC\Laborator 2\Abobului_Ioan_3131_B\Cube.txt";
 
+        private Color[] cubeColors;
+        Randomizer randomColors;
+
+        //Miscare obiect
+        bool startAnimatieDown;
+        bool startAnimatieUp;
+        bool mouseClicked;
+        private ulong updatesCounter;
+        private int maxHeight = 25;
+
+        //Forme
+        Cube cub2;
+        MassiveObject obj;
+
+        /// Camera 3d
+        private readonly Camera3D cam;
         //functie pentru a verifica daca culoarea este la minim sau maxim
 
         public bool CheckIfInRangeColor(int color)
@@ -42,39 +59,51 @@ namespace OpenTK_console_sample02
         // Constructor.
         public SimpleWindow3D() : base(800, 600, new GraphicsMode(32, 24, 0, 8))
         {
-            VSync = VSyncMode.On;
+            VSync = VSyncMode.Adaptive;
+            updatesCounter = 0;
 
-            WiewPort[0] = WiewPort[1] = WiewPort[2] = 10;
+            obj = new MassiveObject(Color.Blue);
+
+            cam = new Camera3D();
+            cub2 = new Cube(fileNameCube); // cub animatie
+            startAnimatieUp = true;
+            startAnimatieDown = false;
+
+            ///initializare culori pentru cub
+            randomColors = new Randomizer();
+            cubeColors = new Color[6];
+            for (int i = 0; i < 6; i++)
+            {
+                cubeColors[i] = randomColors.RandomColor();
+            }
         }
 
-        /**Setare mediu OpenGL și încarcarea resurselor (dacă e necesar) - de exemplu culoarea de
-           fundal a ferestrei 3D.
-           Atenție! Acest cod se execută înainte de desenarea efectivă a scenei 3D. */
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Less);
 
-            GL.ClearColor(Color.LightSeaGreen);
-            //GL.Enable(EnableCap.DepthTest);
+            GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
         }
 
-        /**Inițierea afișării și setarea viewport-ului grafic. Metoda este invocată la redimensionarea
-           ferestrei. Va fi invocată o dată și imediat după metoda ONLOAD()!
-           Viewport-ul va fi dimensionat conform mărimii ferestrei active (cele 2 obiecte pot avea și mărimi
-           diferite). */
+
+
 
         protected override void OnResize(EventArgs e)
         {
-            base.OnResize(e);
+            GL.ClearColor(Color.Gray);
 
-            GL.Viewport(0, 0, Width, Height);
+            // set viewport
+            GL.Viewport(0, 0, this.Width, this.Height);
 
-            double aspect_ratio = Width / (double)Height;
-
-            Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, (float)aspect_ratio, 1, 64);
+            // set perspective
+            Matrix4 perspectiva = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, (float)this.Width / (float)this.Height, 1, 1024);
             GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadMatrix(ref perspective);
+            GL.LoadMatrix(ref perspectiva);
+
+            // set the eye
+            cam.SetCamera();
         }
 
         /** Secțiunea pentru "game logic"/"business logic". Tot ce se execută în această secțiune va fi randat
@@ -86,11 +115,61 @@ namespace OpenTK_console_sample02
 
             KeyboardState keyboard = OpenTK.Input.Keyboard.GetState();
             MouseState mouse = OpenTK.Input.Mouse.GetState();
-            moveLeft = false;
-            moveRight = false;
-            moveUp = false;
-            moveDown = false;
+            //moveLeft = false;
+            //moveRight = false;
+            //moveUp = false;
+            //moveDown = false;
 
+
+            #region Laborator 5 Camera 3D
+            // camera control (isometric mode)
+            if (keyboard[Key.W])
+            {
+                cam.MoveForward();
+            }
+            if (keyboard[Key.S])
+            {
+                cam.MoveBackward();
+            }
+            if (keyboard[Key.A])
+            {
+                cam.MoveLeft();
+            }
+            if (keyboard[Key.D])
+            {
+                cam.MoveRight();
+            }
+            if (keyboard[Key.Q])
+            {
+                cam.MoveUp();
+            }
+            if (keyboard[Key.E])
+            {
+                cam.MoveDown();
+            }
+            //Set camera far
+            if (keyboard[Key.F] && !keyboard.Equals(lastKeyPress))
+            {
+                cam.SetCameraFar();
+            }
+            if (keyboard[Key.C] && !keyboard.Equals(lastKeyPress))
+            {
+                cam.SetCameraClose();
+            }
+
+            #endregion
+            if (keyboard[OpenTK.Input.Key.O] && !keyboard.Equals(lastKeyPress))
+            {
+                obj.ToggleVisibility();
+            }
+
+
+            #region Laborator 5 animatie cadere
+            if (mouse[MouseButton.Left])
+            {
+                mouseClicked = true;
+            }
+            #endregion
             ///Laborator 3 - punctul 9 si 8 cu modificarea culori
 
             #region Laborator 3 - punctul 9- Modificare culoare RGB
@@ -200,6 +279,37 @@ namespace OpenTK_console_sample02
 
             #endregion Verificare si modificare stare tasta
 
+            #region Schimbarea culorii cubului Laborator 4 Punctul 1,3
+
+            Randomizer faceColor = new Randomizer();
+            if (keyboard[OpenTK.Input.Key.Number1])
+            {
+                cubeColors[0] = faceColor.RandomColor();
+            }
+            if (keyboard[OpenTK.Input.Key.Number2])
+            {
+                cubeColors[1] = faceColor.RandomColor();
+            }
+            if (keyboard[OpenTK.Input.Key.Number3])
+            {
+                cubeColors[2] = faceColor.RandomColor();
+            }
+            if (keyboard[OpenTK.Input.Key.Number4])
+            {
+                cubeColors[3] = faceColor.RandomColor();
+            }
+            if (keyboard[OpenTK.Input.Key.Number5])
+            {
+                cubeColors[4] = faceColor.RandomColor();
+            }
+            if (keyboard[OpenTK.Input.Key.Number6])
+            {
+                cubeColors[5] = faceColor.RandomColor();
+            }
+
+
+            #endregion
+
             //Laborator 3 Miscare cu mouse
 
             #region Laborator 3 Miscare mouse
@@ -246,6 +356,7 @@ namespace OpenTK_console_sample02
             //        showCube = true;
             //    }
             //}
+            lastKeyPress = keyboard;
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -254,14 +365,24 @@ namespace OpenTK_console_sample02
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             //  Matrix4 lookat = Matrix4.LookAt(6, 6, 10, 0, 0, 0, 0, 1, 0);
-            Matrix4 lookat = Matrix4.LookAt(WiewPort[0], WiewPort[1], WiewPort[2], 0, 0, 0, 0, 1, 0);
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref lookat);
+            //Matrix4 lookat = Matrix4.LookAt(WiewPort[0], WiewPort[1], WiewPort[2], 0, 0, 0, 0, 1, 0);
+            //GL.MatrixMode(MatrixMode.Modelview);
+            //GL.LoadMatrix(ref lookat);
 
-            DrawAxes();
+            Axes coordAxes = new Axes();
+            coordAxes.setWidth(5);
+            coordAxes.DrawAxes();
+
+            obj.Draw();
 
             Triunghi T = Triunghi.ReadCoordonates(FileName);
             T.DrawMe(colorRed, colorGreen, colorBlue);
+
+            Cube cub = new Cube(fileNameCube);
+
+            if (mouseClicked)
+                this.MoveCube(cub2);
+            cub2.DrawCube(cubeColors);
 
             //Laborator 2 - Miscarea cubului cu ajutorul tastelor
 
@@ -297,15 +418,41 @@ namespace OpenTK_console_sample02
             //angle += rotation_speed * (float)e.Time;
             //GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
 
+
             #endregion Laborator 2 - Miscarea cubului cu ajutorul tastelor
 
             // Exportăm controlul randării obiectelor către o metodă externă (modularizare).
             if (showCube == true)
             {
-                DrawCube();
+                cub.DrawCube(cubeColors);
             }
             SwapBuffers();
             //Thread.Sleep(1);
+        }
+
+        private void MoveCube(Cube c)
+        {
+            if (startAnimatieDown == true && c.getHeight() >= 0)
+            {
+                c.CubeTranslate(new Vector3(0, -0.2f, 0));
+                //Console.WriteLine(c.getHeight());
+                if (c.getHeight() == 0)
+                {
+                    startAnimatieUp = true;
+                    startAnimatieDown = false;
+                    mouseClicked = false;
+                }
+            }
+            if (startAnimatieUp == true && c.getHeight() <= maxHeight)
+            {
+                c.CubeTranslate(new Vector3(0, +0.2f, 0));
+                if (c.getHeight() == maxHeight)
+                {
+                    startAnimatieUp = false;
+                    startAnimatieDown = true;
+                    mouseClicked = false;
+                }
+            }
         }
 
         //Laboratorul 3- punctul 1 - Desenarea axelor

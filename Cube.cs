@@ -42,7 +42,14 @@ namespace Abobului_Ioan_3131_B_Lab_2
             }
             GL.End();
         }
-
+        public void CubeTranslate(Vector3 translateVector)
+        {
+            for (int i = 0; i < cube.Length; i++)
+            {
+                cube[i] += translateVector;
+            }
+        }
+        public int getHeight() { return (int)cube[0].Y; }
         private Vector3[] CreateCubeFromFile(string fileName)
         {
             using (StreamReader sr = new StreamReader(fileName))
